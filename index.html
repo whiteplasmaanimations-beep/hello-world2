@@ -1,194 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ocean Haiku</title>
+<meta charset="UTF-8">
+<title>47 Days Interactive Story</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      color: white;
-      overflow-x: hidden;
+<style>
+body {
+  margin: 0;
+  font-family: monospace;
+  background: #0b0f1a;
+  color: white;
+  text-align: center;
+}
 
-      /* Sky backgrond shot */
-      background: linear-gradient(to bottom, #87ceeb, #0b3d5c);
-      transition: background 1s;
-    }
+button {
+  padding: 12px 20px;
+  margin: 10px;
+  cursor: pointer;
+  background: #1f2a44;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
 
-    h2 {
-      margin-top: 60px;
-      position: relative;
-      z-index: 3;
-    }
+button:hover {
+  background: #2e3d66;
+}
 
-    .line {
-      font-size: 24px;
-      margin: 20px;
-      display: none;
-      opacity: 0;
-      transition: opacity 1s ease;
-      position: relative;
-      z-index: 3;
-    }
+#container {
+  padding: 40px;
+  max-width: 700px;
+  margin: auto;
+}
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      position: relative;
-      z-index: 3;
-    }
+.fade {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
 
-    /* Sun Behind the interactive poem */
-    .sun {
-      position: fixed;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 100px;
-      background: radial-gradient(circle, #ffd700, #ff8c00);
-      border-radius: 50%;
-      z-index: 1;
-      transition: opacity 2s;
-    }
-
-    /* Stars (not from Nemesis jk) */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(white 1px, transparent 1px);
-      background-size: 50px 50px;
-      opacity: 0;
-      z-index: 1;
-      transition: opacity 2s;
-      animation: twinkle 3s infinite alternate;
-    }
-
-    @keyframes twinkle {
-      from { opacity: 0.5; }
-      to { opacity: 1; }
-    }
-
-    /* Bottom waves slight */
-    .wave {
-      position: fixed;
-      bottom: 0;
-      width: 200%;
-      height: 120px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 40%;
-      animation: waveMove 20s linear infinite;
-      z-index: 2;
-    }
-
-    .wave2 {
-      bottom: 20px;
-      opacity: 0.5;
-      animation-duration: 25s;
-    }
-
-    @keyframes waveMove {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-
-    /*  Side waves subttle animatino */
-    .side-wave {
-      position: fixed;
-      top: 0;
-      width: 60px;
-      height: 100%;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.15),
-        rgba(255,255,255,0.15) 10px,
-        transparent 10px,
-        transparent 20px
-      );
-      z-index: 0;
-      animation: waveSide 6s ease-in-out infinite;
-    }
-
-    .left-wave { left: 0; }
-    .right-wave { right: 0; }
-
-    @keyframes waveSide {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(10px); }
-      100% { transform: translateY(0); }
-    }
-
-  </style>
+.show {
+  opacity: 1;
+}
+</style>
 </head>
 
 <body>
 
-<div class="sun"></div>
-<div class="stars" id="stars"></div>
+<div id="container">
 
-<!-- Side waves -->
-<div class="side-wave left-wave"></div>
-<div class="side-wave right-wave"></div>
+  <h1>Choose Your Story</h1>
 
-<h2>Haiku: 47 Days Adrift</h2>
+  <button onclick="startGame('athlete')">Olympic Athlete</button>
+  <button onclick="startGame('adrift')">47 Days Adrift</button>
+  <button onclick="startGame('prisoner')">Prisoner of War</button>
 
-<p id="line1" class="line">Endless water surrounds</p>
-<p id="line2" class="line">Sun burns, hope drifts with the tide</p>
-<p id="line3" class="line">Souls refuse to starve or sink</p>
+  <div id="story" style="margin-top:30px;"></div>
 
-<p id="line4" class="line">Waves whisper softly and strongly in other times</p>
-<p id="line5" class="line">Salt clings to tired hands</p>
-<p id="line6" class="line">The horizon won’t answer</p>
-<p id="line7" class="line">Night swallows the sky</p>
-<p id="line8" class="line">Stars flicker, then fade again</p>
-<p id="line9" class="line">Still, I drift forward</p>
-
-<button id="btn" onclick="showNext()">Reveal Next Line</button>
-
-<!-- Bottom waves -->
-<div class="wave"></div>
-<div class="wave wave2"></div>
+</div>
 
 <script>
-let step = 1;
-let totalLines = 9;
 
-function showNext() {
-  if (step <= totalLines) {
-    let el = document.getElementById("line" + step);
-    el.style.display = "block";
+let path = "";
+let energy = 5;
+let day = 1;
 
-    setTimeout(() => {
-      el.style.opacity = 1;
-    }, 50);
+function startGame(choice) {
+  path = choice;
+  energy = 5;
+  day = 1;
 
-    step++;
+  if (choice === "athlete") athleteScene();
+  if (choice === "adrift") adriftScene();
+  if (choice === "prisoner") prisonerScene();
+}
+
+/* ---------------- ATHLETE ---------------- */
+
+function athleteScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>The Athlete</h2>
+    <p>You are running in the 1936 Olympics.</p>
+    <button onclick="athleteChoice('push')">Push harder</button>
+    <button onclick="athleteChoice('steady')">Stay steady</button>
+  `;
+}
+
+function athleteChoice(c) {
+  if (c === "push") {
+    energy--;
+    show("You sprint forward. Pain builds.");
+  } else {
+    show("You keep pace. Safe but unnoticed.");
   }
 
-  // Sunset
-  if (step === 4) {
-    document.body.style.background =
-      "linear-gradient(to bottom, #f39c12, #2c3e50)";
-  }
+  checkEndAthlete();
+}
 
-  // Night
-  if (step === 7) {
-    document.body.style.background =
-      "linear-gradient(to bottom, #0b1a2a, #000000)";
-
-    document.getElementById("stars").style.opacity = 0.8;
-    document.querySelector(".sun").style.opacity = 0.3;
-  }
-
-  if (step > totalLines) {
-    document.getElementById("btn").innerText = "All lines revealed 🌊";
+function checkEndAthlete() {
+  if (energy <= 2) {
+    gameOver("You collapse before the finish.");
+  } else {
+    show("You finish the race. Not first. But remembered.");
   }
 }
+
+/* ---------------- ADRIFT ---------------- */
+
+function adriftScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>47 Days Adrift</h2>
+    <p>Day ${day}</p>
+    <p>Energy: ${energy}</p>
+
+    <button onclick="adriftChoice('eat')">Eat resource</button>
+    <button onclick="adriftChoice('save')">Save it</button>
+  `;
+}
+
+function adriftChoice(c) {
+
+  if (c === "eat") {
+    energy += 2;
+    show("You eat. Strength returns.");
+  }
+
+  if (c === "save") {
+    energy -= 1;
+    show("You endure hunger.");
+  }
+
+  day++;
+
+  // survival pressure increases over time
+  energy--;
+
+  if (day > 47) {
+    showEnding("You survived all 47 days. Barely.");
+    return;
+  }
+
+  if (energy <= 0) {
+    gameOver("You didn’t survive the ocean.");
+    return;
+  }
+
+  setTimeout(adriftScene, 500);
+}
+
+/* ---------------- PRISONER ---------------- */
+
+function prisonerScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>Prisoner of War</h2>
+    <p>You are ordered to obey.</p>
+
+    <button onclick="prisonerChoice('obey')">Obey</button>
+    <button onclick="prisonerChoice('resist')">Resist</button>
+  `;
+}
+
+function prisonerChoice(c) {
+
+  if (c === "obey") {
+    show("You survive another day.");
+  }
+
+  if (c === "resist") {
+    energy -= 3;
+    show("Punishment. Pain follows.");
+  }
+
+  if (energy <= 0) {
+    gameOver("You could not endure captivity.");
+  } else {
+    show("Time passes. No control.");
+  }
+}
+
+/* ---------------- SYSTEM ---------------- */
+
+function show(text) {
+  document.getElementById("story").innerHTML += `<p>${text}</p>`;
+}
+
+function gameOver(text) {
+  document.getElementById("story").innerHTML = `
+    <h2>Failure</h2>
+    <p>${text}</p>
+    <button onclick="location.reload()">Try again</button>
+  `;
+}
+
+function showEnding(text) {
+  document.getElementById("story").innerHTML = `
+    <h2>Ending</h2>
+    <p>${text}</p>
+    <button onclick="location.reload()">Play again</button>
+  `;
+}
+
 </script>
 
 </body>
