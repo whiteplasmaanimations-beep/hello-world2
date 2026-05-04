@@ -11,59 +11,6 @@ body {
   background: linear-gradient(#0b0f1a, #1a2238);
   color: white;
   text-align: center;
-  overflow-x: hidden;
-}
-
-/* SKY ELEMENTS */
-#sky {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-}
-
-.sun, .moon {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  top: 10%;
-  left: -100px;
-  animation: moveSky 30s linear infinite;
-}
-
-.sun {
-  background: radial-gradient(circle, #ffd27f, #ff9800);
-  box-shadow: 0 0 40px #ffb347;
-}
-
-.moon {
-  background: radial-gradient(circle, #ddd, #aaa);
-  box-shadow: 0 0 20px #fff;
-  animation-delay: 15s;
-}
-
-@keyframes moveSky {
-  0% { left: -100px; top: 10%; }
-  50% { top: 5%; }
-  100% { left: 110%; top: 10%; }
-}
-
-/* STARS */
-.star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: white;
-  animation: twinkle 2s infinite alternate;
-}
-
-@keyframes twinkle {
-  from { opacity: 0.2; }
-  to { opacity: 1; }
 }
 
 button {
@@ -75,4 +22,244 @@ button {
   border: none;
   border-radius: 8px;
   transition: transform 0.2s, background 0.3s;
+}
+
+button:hover {
+  background: #2e3d66;
+  transform: scale(1.1);
+}
+
+#container {
+  padding: 40px;
+  max-width: 700px;
+  margin: auto;
+}
+
+.fadeText {
+  animation: fadeText 0.5s ease;
+}
+
+@keyframes fadeText {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="container">
+
+  <h1>Choose Your Story</h1>
+
+  <button onclick="startGame('athlete')">Olympic Athlete</button>
+  <button onclick="startGame('adrift')">47 Days Adrift</button>
+  <button onclick="startGame('prisoner')">Prisoner of War</button>
+
+  <div id="story" style="margin-top:30px;"></div>
+
+</div>
+
+<script>
+
+let path = "";
+let energy = 5;
+let morale = 5;
+let day = 1;
+
+function startGame(choice) {
+  path = choice;
+  energy = 5;
+  morale = 5;
+  day = 1;
+
+  if (choice === "athlete") athleteScene();
+  if (choice === "adrift") adriftScene();
+  if (choice === "prisoner") prisonerScene();
+}
+
+function animateText(text) {
+  return `<p class='fadeText'>${text}</p>`;
+}
+
+/* ATHLETE */
+function athleteScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>The Athlete</h2>
+    <p>Final lap. Your legs burn. Crowd roars.</p>
+    <p>Energy: ${energy} | Morale: ${morale}</p>
+
+    <button onclick="athleteChoice('push')">Sprint</button>
+    <button onclick="athleteChoice('pace')">Maintain pace</button>
+    <button onclick="athleteChoice('focus')">Focus breathing</button>
+  `;
+}
+
+function athleteChoice(c) {
+  if (c === "push") {
+    energy -= 2;
+    morale += 1;
+    show("You explode forward. The crowd reacts.");
+  }
+
+  if (c === "pace") {
+    energy -= 1;
+    show("You hold steady. Controlled.");
+  }
+
+  if (c === "focus") {
+    morale += 2;
+    energy -= 1;
+    show("You calm yourself. Mind over body.");
+  }
+
+  resolveAthlete();
+}
+
+function resolveAthlete() {
+  if (energy <= 0) return gameOver("Your body gives out.");
+
+  if (morale >= 8 && energy > 0) {
+    showEnding("You surge at the last second and win gold.");
+  } else if (energy <= 2) {
+    showEnding("You finish, barely standing. A quiet respect follows.");
+  } else {
+    show("The race continues...");
+    setTimeout(athleteScene, 700);
+  }
+}
+
+/* ADRIFT */
+function adriftScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>47 Days Adrift</h2>
+    <p>Day ${day}</p>
+    <p>Energy: ${energy} | Morale: ${morale}</p>
+
+    <button onclick="adriftChoice('eat')">Eat</button>
+    <button onclick="adriftChoice('fish')">Try fishing</button>
+    <button onclick="adriftChoice('rest')">Rest</button>
+  `;
+}
+
+function adriftChoice(c) {
+
+  if (c === "eat") {
+    energy += 2;
+    morale += 1;
+    show("You eat your limited supplies.");
+  }
+
+  if (c === "fish") {
+    if (Math.random() > 0.5) {
+      energy += 3;
+      morale += 2;
+      show("You catch a fish. Hope returns.");
+    } else {
+      energy -= 2;
+      show("You fail and waste energy.");
+    }
+  }
+
+  if (c === "rest") {
+    energy += 1;
+    morale -= 1;
+    show("You rest. Time slips away.");
+  }
+
+  day++;
+  energy--;
+  morale--;
+
+  if (day > 47) {
+    if (morale > 5) showEnding("You survive and are rescued, spirit intact.");
+    else showEnding("You survive, but something inside you is lost.");
+    return;
+  }
+
+  if (energy <= 0 || morale <= 0) {
+    gameOver("The ocean takes everything.");
+    return;
+  }
+
+  // random event
+  if (Math.random() > 0.7) {
+    show("A storm hits violently.");
+    energy -= 2;
+    morale -= 1;
+  }
+
+  setTimeout(adriftScene, 700);
+}
+
+/* PRISONER */
+function prisonerScene() {
+  document.getElementById("story").innerHTML = `
+    <h2>Prisoner of War</h2>
+    <p>Day ${day}</p>
+    <p>Energy: ${energy} | Morale: ${morale}</p>
+
+    <button onclick="prisonerChoice('obey')">Obey</button>
+    <button onclick="prisonerChoice('resist')">Resist</button>
+    <button onclick="prisonerChoice('bond')">Talk to another prisoner</button>
+  `;
+}
+
+function prisonerChoice(c) {
+
+  if (c === "obey") {
+    energy -= 1;
+    show("You survive quietly.");
+  }
+
+  if (c === "resist") {
+    energy -= 3;
+    morale += 1;
+    show("You resist. Pain, but pride.");
+  }
+
+  if (c === "bond") {
+    morale += 2;
+    show("You share stories. Humanity remains.");
+  }
+
+  day++;
+
+  if (energy <= 0) return gameOver("Your body breaks.");
+  if (morale <= 0) return gameOver("Your mind collapses.");
+
+  if (day > 10 && morale > 7) {
+    showEnding("You help organize an escape. Freedom.");
+    return;
+  }
+
+  show("Another day passes under watch.");
+  setTimeout(prisonerScene, 700);
+}
+
+/* SYSTEM */
+function show(text) {
+  document.getElementById("story").innerHTML += animateText(text);
+}
+
+function gameOver(text) {
+  document.getElementById("story").innerHTML = `
+    <h2>Failure</h2>
+    ${animateText(text)}
+    <button onclick="location.reload()">Try again</button>
+  `;
+}
+
+function showEnding(text) {
+  document.getElementById("story").innerHTML = `
+    <h2>Ending</h2>
+    ${animateText(text)}
+    <button onclick="location.reload()">Play again</button>
+  `;
+}
+
+</script>
+
+</body>
 </html>
