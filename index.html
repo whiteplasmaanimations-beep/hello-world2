@@ -11,26 +11,6 @@ body {
   background: linear-gradient(#0b0f1a, #1a2238);
   color: white;
   text-align: center;
-  overflow: hidden;
-}
-
-/* Animated fog GIF background */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 200%;
-  height: 200%;
-  background: url("https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif");
-  background-size: cover;
-  opacity: 0.15;
-  animation: moveBg 60s linear infinite;
-}
-
-@keyframes moveBg {
-  from { transform: translate(0, 0); }
-  to { transform: translate(-25%, -25%); }
 }
 
 button {
@@ -55,6 +35,24 @@ button:hover {
   margin: auto;
 }
 
+/* Bars */
+.barContainer {
+  background: #333;
+  border-radius: 10px;
+  margin: 10px 0;
+  height: 20px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  width: 100%;
+  transition: width 0.5s ease;
+}
+
+.energy { background: #4caf50; }
+.morale { background: #2196f3; }
+
 /* Scene transition */
 .fadeScene {
   animation: fadeScene 0.6s ease;
@@ -65,17 +63,17 @@ button:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Screen shake */
+/* Shake */
 .shake {
   animation: shake 0.3s;
 }
 
 @keyframes shake {
-  0% { transform: translate(0px, 0px); }
+  0% { transform: translate(0, 0); }
   25% { transform: translate(5px, -5px); }
   50% { transform: translate(-5px, 5px); }
   75% { transform: translate(5px, 5px); }
-  100% { transform: translate(0px, 0px); }
+  100% { transform: translate(0, 0); }
 }
 </style>
 </head>
@@ -96,16 +94,13 @@ button:hover {
 
 <script>
 
-let path = "";
 let energy = 5;
 let morale = 5;
 let day = 1;
 
-/* TYPEWRITER */
+/* TYPE TEXT */
 function typeText(text) {
   let i = 0;
-  const speed = 20;
-
   const p = document.createElement("p");
   document.getElementById("story").appendChild(p);
 
@@ -113,28 +108,44 @@ function typeText(text) {
     if (i < text.length) {
       p.innerHTML += text.charAt(i);
       i++;
-      setTimeout(typing, speed);
+      setTimeout(typing, 20);
     }
   }
 
   typing();
 }
 
-/* SCENE WRAPPER */
+/* SCENE */
 function setScene(html) {
-  const story = document.getElementById("story");
-  story.innerHTML = `<div class="fadeScene">${html}</div>`;
+  document.getElementById("story").innerHTML =
+    `<div class="fadeScene">${html}</div>`;
 }
 
 /* SHAKE */
 function shakeScreen() {
-  const container = document.getElementById("container");
-  container.classList.add("shake");
-  setTimeout(() => container.classList.remove("shake"), 300);
+  const c = document.getElementById("container");
+  c.classList.add("shake");
+  setTimeout(() => c.classList.remove("shake"), 300);
+}
+
+/* BARS */
+function bars() {
+  return `
+    <div>
+      <p>Energy</p>
+      <div class="barContainer">
+        <div class="barFill energy" style="width:${energy * 20}%"></div>
+      </div>
+
+      <p>Morale</p>
+      <div class="barContainer">
+        <div class="barFill morale" style="width:${morale * 20}%"></div>
+      </div>
+    </div>
+  `;
 }
 
 function startGame(choice) {
-  path = choice;
   energy = 5;
   morale = 5;
   day = 1;
@@ -148,9 +159,7 @@ function startGame(choice) {
 function athleteScene() {
   setScene(`
     <h2>The Athlete</h2>
-    <img src="https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.gif" style="width:100%; border-radius:10px;">
-    <p>Energy: ${energy} | Morale: ${morale}</p>
-
+    ${bars()}
     <button onclick="athleteChoice('push')">Sprint</button>
     <button onclick="athleteChoice('pace')">Maintain pace</button>
     <button onclick="athleteChoice('focus')">Focus breathing</button>
@@ -163,19 +172,19 @@ function athleteChoice(c) {
   if (c === "push") {
     energy -= 2;
     morale += 1;
-    typeText("You explode forward. The crowd reacts.");
+    typeText("You explode forward.");
     shakeScreen();
   }
 
   if (c === "pace") {
     energy -= 1;
-    typeText("You hold steady. Controlled.");
+    typeText("You hold steady.");
   }
 
   if (c === "focus") {
     morale += 2;
     energy -= 1;
-    typeText("You calm yourself. Mind over body.");
+    typeText("You regain control.");
   }
 
   resolveAthlete();
@@ -184,10 +193,10 @@ function athleteChoice(c) {
 function resolveAthlete() {
   if (energy <= 0) return gameOver("Your body gives out.");
 
-  if (morale >= 8 && energy > 0) {
-    showEnding("You surge at the last second and win gold.");
+  if (morale >= 8) {
+    showEnding("You win gold.");
   } else if (energy <= 2) {
-    showEnding("You finish, barely standing.");
+    showEnding("You finish barely standing.");
   } else {
     setTimeout(athleteScene, 1000);
   }
@@ -197,12 +206,10 @@ function resolveAthlete() {
 function adriftScene() {
   setScene(`
     <h2>47 Days Adrift</h2>
-    <img src="https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif" style="width:100%; border-radius:10px;">
     <p>Day ${day}</p>
-    <p>Energy: ${energy} | Morale: ${morale}</p>
-
+    ${bars()}
     <button onclick="adriftChoice('eat')">Eat</button>
-    <button onclick="adriftChoice('fish')">Try fishing</button>
+    <button onclick="adriftChoice('fish')">Fish</button>
     <button onclick="adriftChoice('rest')">Rest</button>
   `);
 }
@@ -212,17 +219,17 @@ function adriftChoice(c) {
   if (c === "eat") {
     energy += 2;
     morale += 1;
-    typeText("You eat your limited supplies.");
+    typeText("You eat supplies.");
   }
 
   if (c === "fish") {
     if (Math.random() > 0.5) {
       energy += 3;
       morale += 2;
-      typeText("You catch a fish. Hope returns.");
+      typeText("You catch a fish.");
     } else {
       energy -= 2;
-      typeText("You fail and waste energy.");
+      typeText("You fail.");
       shakeScreen();
     }
   }
@@ -230,7 +237,7 @@ function adriftChoice(c) {
   if (c === "rest") {
     energy += 1;
     morale -= 1;
-    typeText("You rest. Time slips away.");
+    typeText("You rest.");
   }
 
   day++;
@@ -238,21 +245,13 @@ function adriftChoice(c) {
   morale--;
 
   if (day > 47) {
-    if (morale > 5) showEnding("You survive and are rescued.");
-    else showEnding("You survive, but something inside you is lost.");
+    showEnding("You survive.");
     return;
   }
 
   if (energy <= 0 || morale <= 0) {
-    gameOver("The ocean takes everything.");
+    gameOver("The ocean wins.");
     return;
-  }
-
-  if (Math.random() > 0.7) {
-    typeText("A storm hits violently.");
-    shakeScreen();
-    energy -= 2;
-    morale -= 1;
   }
 
   setTimeout(adriftScene, 1200);
@@ -262,10 +261,8 @@ function adriftChoice(c) {
 function prisonerScene() {
   setScene(`
     <h2>Prisoner of War</h2>
-    <img src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" style="width:100%; border-radius:10px;">
     <p>Day ${day}</p>
-    <p>Energy: ${energy} | Morale: ${morale}</p>
-
+    ${bars()}
     <button onclick="prisonerChoice('obey')">Obey</button>
     <button onclick="prisonerChoice('resist')">Resist</button>
     <button onclick="prisonerChoice('bond')">Talk</button>
@@ -276,19 +273,19 @@ function prisonerChoice(c) {
 
   if (c === "obey") {
     energy -= 1;
-    typeText("You survive quietly.");
+    typeText("You endure.");
   }
 
   if (c === "resist") {
     energy -= 3;
     morale += 1;
-    typeText("You resist. Pain, but pride.");
+    typeText("You resist.");
     shakeScreen();
   }
 
   if (c === "bond") {
     morale += 2;
-    typeText("You share stories. Humanity remains.");
+    typeText("You connect.");
   }
 
   day++;
@@ -297,11 +294,11 @@ function prisonerChoice(c) {
   if (morale <= 0) return gameOver("Your mind collapses.");
 
   if (day > 10 && morale > 7) {
-    showEnding("You organize an escape. Freedom.");
+    showEnding("You escape.");
     return;
   }
 
-  typeText("Another day passes under watch.");
+  typeText("Another day passes.");
   setTimeout(prisonerScene, 1200);
 }
 
