@@ -128,7 +128,7 @@ function shakeScreen() {
   setTimeout(() => c.classList.remove("shake"), 300);
 }
 
-/* BARS */
+/* Health BARS */
 function bars() {
   return `
     <div>
@@ -155,7 +155,7 @@ function startGame(choice) {
   if (choice === "prisoner") prisonerScene();
 }
 
-/* ATHLETE */
+/* OLYMPIC ATHLETE */
 function athleteScene() {
   setScene(`
     <h2>The Athlete</h2>
@@ -257,7 +257,7 @@ function adriftChoice(c) {
   setTimeout(adriftScene, 1200);
 }
 
-/* PRISONER */
+/* PRISONER OF WARRRRR */
 function prisonerScene() {
   setScene(`
     <h2>Prisoner of War</h2>
